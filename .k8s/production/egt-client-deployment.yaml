@@ -32,7 +32,7 @@ spec:
               command: ["sleep", "15"]
         readinessProbe:
           httpGet:
-            path: /
+            path: /status
             port: 3001
           failureThreshold: 3
           periodSeconds: 10
