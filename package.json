@@ -1,0 +1,31 @@
+{
+  "name": "egtUtil-forum-invite-generator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/eliteguardtraining/egtUtil-forum-invite-generator.git",
+  "author": "Isaac Hinman <isaac@isaachinman.com>",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=9"
+  },
+  "scripts": {
+    "start": "babel-node ./src/index.js",
+    "lint": "eslint src",
+    "build": "babel src --out-dir dist"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-module-resolver": "^3.0.0",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.13.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "nodemon": "^1.14.11"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
+    "express": "^4.16.2",
+    "winston": "^2.4.0"
+  }
+}

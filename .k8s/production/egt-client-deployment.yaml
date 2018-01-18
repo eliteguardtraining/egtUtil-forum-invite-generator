@@ -1,0 +1,48 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: egtUtil-forum-invite-generator
+  namespace: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: egtUtil-forum-invite-generator
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  minReadySeconds: 20
+  template:
+    metadata:
+      labels:
+        app: egtUtil-forum-invite-generator
+    spec:
+      containers:
+      - name: egtUtil-forum-invite-generator
+        image: 084253039423.dkr.ecr.us-east-1.amazonaws.com/egtutil-forum-invite-generator:production
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 3001
+            name: http
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sleep", "15"]
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3001
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 3
+          initialDelaySeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /status
+            port: 3001
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 3
+          initialDelaySeconds: 20

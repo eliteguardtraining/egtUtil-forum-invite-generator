@@ -1,0 +1,43 @@
+machine:
+  environment:
+    CI: true
+    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
+    PROJECT_IMAGE: "084253039423.dkr.ecr.us-east-1.amazonaws.com/egtUtil-forum-invite-generator"
+    GETLOGIN: "aws ecr get-login --include-email --region us-east-1"
+  services:
+    - docker
+
+dependencies:
+  override:
+    - sudo apt-get update
+    - sudo apt-get install -y awscli
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - curl -o kops -LO https://github.com/kubernetes/kops/releases/download/1.7.1/kops-linux-amd64
+    - chmod +x ./kubectl ./kops
+    - sudo mv -t /usr/local/bin/ ./kubectl ./kops
+    - kops export kubecfg --name k8s.eliteguardtraining.com --state=s3://clusters.k8s.eliteguardtraining.com
+  cache_directories:
+    - ~/.kube
+
+compile:
+  override:
+    - docker build -t egtUtil-forum-invite-generator .
+
+test:
+  override:
+    - docker run -it -e CI="true" egtUtil-forum-invite-generator yarn lint
+
+deployment:
+  production:
+    branch: master
+    commands:
+      - LOGIN_STRING=`$GETLOGIN` && ${LOGIN_STRING} && docker tag egtUtil-forum-invite-generator:latest $PROJECT_IMAGE:$CIRCLE_SHA1 && docker push $PROJECT_IMAGE:$CIRCLE_SHA1
+      - LOGIN_STRING=`$GETLOGIN` && ${LOGIN_STRING} && docker tag egtUtil-forum-invite-generator:latest $PROJECT_IMAGE:production && docker push $PROJECT_IMAGE:production
+      - kubectl apply -f .k8s/production
+      - kubectl set image deployment/egtUtil-forum-invite-generator egtUtil-forum-invite-generator=$PROJECT_IMAGE:$CIRCLE_SHA1 -n production
+
+experimental:
+  notify:
+    branches:
+      only:
+        - master
