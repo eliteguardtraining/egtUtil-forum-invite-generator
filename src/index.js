@@ -6,6 +6,13 @@ import cors from 'cors'
 import express from 'express'
 import http from 'http'
 import logger from 'utils/logger'
+import mongoose from 'mongoose'
+
+// Connect to DB
+mongoose.Promise = Promise
+mongoose.connection.openUri(config.dbURI)
+  .then(() => logger.info('Mongoose is connected to MLAB database.'))
+  .catch(err => logger.info(err))
 
 // Instantiate express
 const app = express()
