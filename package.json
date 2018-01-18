@@ -10,6 +10,7 @@
   },
   "scripts": {
     "start": "babel-node ./src/index.js",
+    "dev": "nodemon --exec babel-node ./src/index.js",
     "lint": "eslint src",
     "build": "babel src --out-dir dist"
   },
@@ -23,9 +24,11 @@
     "nodemon": "^1.14.11"
   },
   "dependencies": {
+    "axios": "^0.17.1",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
     "express": "^4.16.2",
+    "validator": "^9.2.0",
     "winston": "^2.4.0"
   }
 }

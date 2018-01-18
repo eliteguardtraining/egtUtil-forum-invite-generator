@@ -1,5 +1,7 @@
 /* Entry point */
+import api from 'api'
 import bodyParser from 'body-parser'
+import config from 'config'
 import cors from 'cors'
 import express from 'express'
 import http from 'http'
@@ -14,17 +16,12 @@ app.use(cors())
 
 // Use JSON and limit body size
 app.use(bodyParser.json({
-  limit: '10kb',
+  limit: config.bodyLimit,
 }))
 
-const testRouter = express.Router()
-testRouter.get('/status', (req, res) => {
-  res.status(200).send('Working via cluster.')
-})
-
-app.use('/', testRouter)
+app.use('/', api)
 
 // Start listening
-app.listen(3001, () => {
-  logger.info('API is listening on port 3001.')
+app.listen(config.port, () => {
+  logger.info(`API is listening on port ${config.port}.`)
 })
