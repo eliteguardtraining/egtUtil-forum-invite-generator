@@ -22,6 +22,6 @@ api.get('/', (req, res) => {
 })
 
 // Status endpoint for Kubernetes readiness/liveness probes
-api.get('/', (req, res) => res.send(200))
+api.get('/status', (req, res) => res.send(200))
 
 export default api
