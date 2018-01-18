@@ -1,8 +1,8 @@
 {
-  "name": "egtUtil-forum-invite-generator",
+  "name": "egtutil-forum-invite-generator",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/eliteguardtraining/egtUtil-forum-invite-generator.git",
+  "repository": "https://github.com/eliteguardtraining/egtutil-forum-invite-generator.git",
   "author": "Isaac Hinman <isaac@isaachinman.com>",
   "license": "UNLICENSED",
   "engines": {

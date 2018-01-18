@@ -2,7 +2,7 @@ machine:
   environment:
     CI: true
     PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
-    PROJECT_IMAGE: "084253039423.dkr.ecr.us-east-1.amazonaws.com/egtUtil-forum-invite-generator"
+    PROJECT_IMAGE: "084253039423.dkr.ecr.us-east-1.amazonaws.com/egtutil-forum-invite-generator"
     GETLOGIN: "aws ecr get-login --include-email --region us-east-1"
   services:
     - docker
@@ -21,20 +21,20 @@ dependencies:
 
 compile:
   override:
-    - docker build -t egtUtil-forum-invite-generator .
+    - docker build -t egtutil-forum-invite-generator .
 
 test:
   override:
-    - docker run -it -e CI="true" egtUtil-forum-invite-generator yarn lint
+    - docker run -it -e CI="true" egtutil-forum-invite-generator yarn lint
 
 deployment:
   production:
     branch: master
     commands:
-      - LOGIN_STRING=`$GETLOGIN` && ${LOGIN_STRING} && docker tag egtUtil-forum-invite-generator:latest $PROJECT_IMAGE:$CIRCLE_SHA1 && docker push $PROJECT_IMAGE:$CIRCLE_SHA1
-      - LOGIN_STRING=`$GETLOGIN` && ${LOGIN_STRING} && docker tag egtUtil-forum-invite-generator:latest $PROJECT_IMAGE:production && docker push $PROJECT_IMAGE:production
+      - LOGIN_STRING=`$GETLOGIN` && ${LOGIN_STRING} && docker tag egtutil-forum-invite-generator:latest $PROJECT_IMAGE:$CIRCLE_SHA1 && docker push $PROJECT_IMAGE:$CIRCLE_SHA1
+      - LOGIN_STRING=`$GETLOGIN` && ${LOGIN_STRING} && docker tag egtutil-forum-invite-generator:latest $PROJECT_IMAGE:production && docker push $PROJECT_IMAGE:production
       - kubectl apply -f .k8s/production
-      - kubectl set image deployment/egtUtil-forum-invite-generator egtUtil-forum-invite-generator=$PROJECT_IMAGE:$CIRCLE_SHA1 -n production
+      - kubectl set image deployment/egtutil-forum-invite-generator egtutil-forum-invite-generator=$PROJECT_IMAGE:$CIRCLE_SHA1 -n production
 
 experimental:
   notify:

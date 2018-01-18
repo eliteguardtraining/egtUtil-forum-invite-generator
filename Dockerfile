@@ -1,6 +1,6 @@
 FROM node:8.1.4-alpine
 
-ENV PROJECT_WORKDIR=/usr/src/egtUtil-forum-invite-generator
+ENV PROJECT_WORKDIR=/usr/src/egtutil-forum-invite-generator
 
 RUN mkdir -p $PROJECT_WORKDIR
 WORKDIR $PROJECT_WORKDIR

@@ -1,13 +1,13 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: egtUtil-forum-invite-generator
+  name: egtutil-forum-invite-generator
   namespace: production
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: egtUtil-forum-invite-generator
+      app: egtutil-forum-invite-generator
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -17,10 +17,10 @@ spec:
   template:
     metadata:
       labels:
-        app: egtUtil-forum-invite-generator
+        app: egtutil-forum-invite-generator
     spec:
       containers:
-      - name: egtUtil-forum-invite-generator
+      - name: egtutil-forum-invite-generator
         image: 084253039423.dkr.ecr.us-east-1.amazonaws.com/egtutil-forum-invite-generator:production
         imagePullPolicy: Always
         ports:
