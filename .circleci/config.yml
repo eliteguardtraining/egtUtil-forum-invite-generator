@@ -24,6 +24,9 @@ jobs:
           paths:
             - node_modules
       - run:
+          name: Run tests
+          command: docker run -it -e CI="true" egtutil-forum-invite-generator yarn lint
+      - run:
           name: Export KOPS config
           command: kops export kubecfg --name k8s.eliteguardtraining.com --state=s3://clusters.k8s.eliteguardtraining.com
       - run:
