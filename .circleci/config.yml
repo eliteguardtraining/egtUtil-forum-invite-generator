@@ -40,7 +40,7 @@ jobs:
           command: kubectl apply -f .k8s/stage
       - run:
           name: Deploy new image to cluster
-          command: kubectl set image deployment/egt-api egt-api=$PROJECT_IMAGE:$CIRCLE_SHA1 -n stage
+          command: kubectl set image deployment/egtutil-forum-invite-generator egtutil-forum-invite-generator=$PROJECT_IMAGE:$CIRCLE_SHA1 -n stage
 
   deploy-production:
     <<: *defaults
@@ -74,7 +74,7 @@ jobs:
           command: kubectl apply -f .k8s/production
       - run:
           name: Deploy new image to cluster
-          command: kubectl set image deployment/egt-api egt-api=$PROJECT_IMAGE:$CIRCLE_SHA1 -n production
+          command: kubectl set image deployment/egtutil-forum-invite-generator egtutil-forum-invite-generator=$PROJECT_IMAGE:$CIRCLE_SHA1 -n production
 
 workflows:
   version: 2
