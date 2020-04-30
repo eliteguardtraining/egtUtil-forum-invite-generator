@@ -1,43 +1,87 @@
-machine:
+defaults: &defaults
+  docker:
+    - image: isaachinman/awscli-kops
   environment:
-    CI: true
-    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
-    PROJECT_IMAGE: "084253039423.dkr.ecr.us-east-1.amazonaws.com/egtutil-forum-invite-generator"
-    GETLOGIN: "aws ecr get-login --include-email --region us-east-1"
-  services:
-    - docker
+    - CI: true
+    - PROJECT_IMAGE: "084253039423.dkr.ecr.us-east-1.amazonaws.com/egtutil-forum-invite-generator"
+    - GETLOGIN: "aws ecr get-login --no-include-email --region us-east-1"
 
-dependencies:
-  override:
-    - sudo apt-get update
-    - sudo apt-get install -y awscli
-    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-    - curl -o kops -LO https://github.com/kubernetes/kops/releases/download/1.7.1/kops-linux-amd64
-    - chmod +x ./kubectl ./kops
-    - sudo mv -t /usr/local/bin/ ./kubectl ./kops
-    - kops export kubecfg --name k8s.eliteguardtraining.com --state=s3://clusters.k8s.eliteguardtraining.com
-  cache_directories:
-    - ~/.kube
+version: 2
+jobs:
+  deploy-stage:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: false
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Build image
+          command: docker build -t egtutil-forum-invite-generator .
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - run:
+          name: Export KOPS config
+          command: kops export kubecfg --name k8s.eliteguardtraining.com --state=s3://clusters.k8s.eliteguardtraining.com
+      - run:
+          name: Push CIRCLE_SHA1 tag
+          command: LOGIN_STRING=`$GETLOGIN` && ${LOGIN_STRING} && docker tag egtutil-forum-invite-generator:latest $PROJECT_IMAGE:$CIRCLE_SHA1 && docker push $PROJECT_IMAGE:$CIRCLE_SHA1
+      - run:
+          name: Push stage tag
+          command: LOGIN_STRING=`$GETLOGIN` && ${LOGIN_STRING} && docker tag egtutil-forum-invite-generator:latest $PROJECT_IMAGE:stage && docker push $PROJECT_IMAGE:stage
+      - run:
+          name: Apply new Kubectl configuration
+          command: kubectl apply -f .k8s/stage
+      - run:
+          name: Deploy new image to cluster
+          command: kubectl set image deployment/egt-api egt-api=$PROJECT_IMAGE:$CIRCLE_SHA1 -n stage
 
-compile:
-  override:
-    - docker build -t egtutil-forum-invite-generator .
+  deploy-production:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: false
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Build image
+          command: docker build -t egtutil-forum-invite-generator .
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - run:
+          name: Run tests
+          command: docker run -it -e CI="true" egtutil-forum-invite-generator yarn test
+      - run:
+          name: Export KOPS config
+          command: kops export kubecfg --name k8s.eliteguardtraining.com --state=s3://clusters.k8s.eliteguardtraining.com
+      - run:
+          name: Push CIRCLE_SHA1 tag
+          command: LOGIN_STRING=`$GETLOGIN` && ${LOGIN_STRING} && docker tag egtutil-forum-invite-generator:latest $PROJECT_IMAGE:$CIRCLE_SHA1 && docker push $PROJECT_IMAGE:$CIRCLE_SHA1
+      - run:
+          name: Push production tag
+          command: LOGIN_STRING=`$GETLOGIN` && ${LOGIN_STRING} && docker tag egtutil-forum-invite-generator:latest $PROJECT_IMAGE:production && docker push $PROJECT_IMAGE:production
+      - run:
+          name: Apply new Kubectl configuration
+          command: kubectl apply -f .k8s/production
+      - run:
+          name: Deploy new image to cluster
+          command: kubectl set image deployment/egt-api egt-api=$PROJECT_IMAGE:$CIRCLE_SHA1 -n production
 
-test:
-  override:
-    - docker run -it -e CI="true" egtutil-forum-invite-generator yarn lint
-
-deployment:
-  production:
-    branch: master
-    commands:
-      - LOGIN_STRING=`$GETLOGIN` && ${LOGIN_STRING} && docker tag egtutil-forum-invite-generator:latest $PROJECT_IMAGE:$CIRCLE_SHA1 && docker push $PROJECT_IMAGE:$CIRCLE_SHA1
-      - LOGIN_STRING=`$GETLOGIN` && ${LOGIN_STRING} && docker tag egtutil-forum-invite-generator:latest $PROJECT_IMAGE:production && docker push $PROJECT_IMAGE:production
-      - kubectl apply -f .k8s/production
-      - kubectl set image deployment/egtutil-forum-invite-generator egtutil-forum-invite-generator=$PROJECT_IMAGE:$CIRCLE_SHA1 -n production
-
-experimental:
-  notify:
-    branches:
-      only:
-        - master
+workflows:
+  version: 2
+  deploy:
+    jobs:
+      - deploy-stage:
+          filters:
+            branches:
+              only: stage
+      - deploy-production:
+          filters:
+            branches:
+              only: master
