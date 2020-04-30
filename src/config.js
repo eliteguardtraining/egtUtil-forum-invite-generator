@@ -6,5 +6,5 @@ export default {
   discourseAPIKey: 'f884bc71cfd8386622696115b1e62f8d8c77484e64e5c9526484b612563ea5fc',
   discourseAPIUsername: 'EliteGuardTraining',
   failureRedirect: 'https://eliteguardtraining.com',
-  dbURI: 'mongodb://egtutil-forum-invite-generator:PhRLFhk7XvNBNxr2@ds157580-a0.mlab.com:57580,ds157580-a1.mlab.com:57580/egt-production?replicaSet=rs-ds157580',
+  dbURI: 'mongodb+srv://egtApp-api:u3QkOjGRTt1R2QQE@egt-production-s0w4r.mongodb.net/egt-production?retryWrites=true&w=majority',
 }
